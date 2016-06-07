@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# 4つのセクションに分かれている\n# データセクション\n## 外部から受け取るデータに対応\ndata {\n  int<lower=0> J; // number of schools \n  real y[J]; // estimated treatment effects\n  real<lower=0> sigma[J]; // s.e. of effect estimates \n}\n# パラメタセクション\n## 今から組みたいモデルで使うパラメタを宣言\nparameters {\n  real mu; \n  real<lower=0> tau;\n  real eta[J];\n}\n# パラメタ変換セクション\n## データとパラメタの橋渡し\ntransformed parameters {\n  real theta[J];\n  for (j in 1:J)\n    theta[j] <- mu + tau * eta[j];\n}\n# モデルセクション\n## パラメタセクションと変換セクションで宣言したものでモデルを書く\nmodel {\n  eta ~ normal(0, 1);\n  y ~ normal(theta, sigma);\n}",
+    "created" : 1465306565653.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4152530800",
+    "id" : "2B133EC8",
+    "lastKnownWriteTime" : 1465307373,
+    "last_content_update" : 1465307373659,
+    "path" : "~/git/MyPractice/stan/8schools.stan",
+    "project_path" : "8schools.stan",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "stan"
+}
