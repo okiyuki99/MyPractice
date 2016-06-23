@@ -1,0 +1,157 @@
+---
+title: "Plotlyの練習"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+    theme: flatly
+    source_code: embed
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+```
+
+```{r, include = F}
+set.seed(100)
+d <- diamonds[sample(nrow(diamonds), 1000), ]
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+#plot_ly(d, x = carat, y = price, text = paste("Clarity: ", clarity),
+#        mode = "markers", color = carat, size = carat)
+
+p <- ggplot(data = d, aes(x = carat, y = price)) +
+  geom_point(aes(text = paste("Clarity:", clarity)), size = 4) +
+  geom_smooth(aes(colour = cut, fill = cut)) + facet_wrap(~ cut)
+
+(gg <- ggplotly(p))
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+p <- plot_ly(economics, x = date, y = uempmed)
+p %>%
+  add_trace(y = fitted(loess(uempmed ~ as.numeric(date))), x = date) %>%
+  layout(title = "Median duration of unemployment (in weeks)",
+         showlegend = FALSE) %>%
+  dplyr::filter(uempmed == max(uempmed)) %>%
+  layout(annotations = list(x = date, y = uempmed, text = "Peak", showarrow = T))
+```
+
+### Chart C
+
+```{r}
+hp <- ggplot(iris, aes(x=Sepal.Length, y=Sepal.Width, color = Species)) + geom_point() + facet_wrap(~Species)
+ggplotly()
+```
+
+Row
+-----------------------------------------------------------------------
+
+### 時系列グラフ
+
+```{r}
+# 時系列グラフ
+p <- plot_ly(economics, x = date, y = uempmed, name = "何かの線1")
+p <- add_trace(p, x = date, y = unemploy, name = "何かの線2", yaxis = "y2")
+p <- add_trace(p, x = date, y = psavert, name = "何かの線3")
+# タイトル と x軸 と y軸 のラベル名を変更
+p <- layout(p, title = "時系列グラフ",
+            xaxis = list(title = "日付"), 
+            yaxis = list(title = "値"),
+            # 判例の位置。左下が(0, 0)
+            legend = list(x = 0.5, y = 1.0),
+            # 2つ目のY軸を出す
+            yaxis2 = list(tickfont = list(color = "red"),
+                          overlaying = "y"
+                          ))
+p
+# 判例を消す
+#p1 <- layout(p, showlegend = FALSE)
+#p1
+```
+
+Row
+-----------------------------------------------------------------------
+
+### facet_grid的な1
+
+```{r}
+# 横に2つ：margin
+p <- subplot(
+  plot_ly(economics, x = date, y = uempmed),
+  plot_ly(economics, x = date, y = unemploy),
+  margin = 0.05
+) %>% layout(showlegend = FALSE)
+p
+```
+
+Row
+-----------------------------------------------------------------------
+
+### facet_grid的な2
+
+```{r}
+# 縦に3つ：nrows
+p <- subplot(
+  plot_ly(economics, x = date, y = uempmed),
+  plot_ly(economics, x = date, y = unemploy),
+  plot_ly(economics, x = date, y = psavert),
+  margin = 0.05,
+  nrows=3
+) %>% layout(showlegend = FALSE)
+p
+```
+
+Row
+-----------------------------------------------------------------------
+
+### facet_grid的な3
+
+```{r}
+# groupで分けることも可能
+p <- plot_ly(iris, x = Petal.Length, y = Petal.Width,
+             group = Species, mode = "markers")
+p
+```
+
+Row
+-----------------------------------------------------------------------
+
+### facet_grid的な4
+
+```{r}
+iris$id <- as.integer(iris$Species)
+p <- plot_ly(iris, x = Petal.Length, y = Petal.Width, group = Species,
+             xaxis = paste0("x", id), mode = "markers")
+p <- subplot(p)
+p
+```
+
+Row
+-----------------------------------------------------------------------
+
+### facet_grid的な5：x軸を共有
+
+```{r}
+# Define xaxis and yaxis
+p <- plot_ly(economics, x = date, y = uempmed, xaxis = "x1", yaxis = "y1")
+p <- add_trace(p, x = date, y = unemploy, xaxis = "x1", yaxis = "y2")
+p <- layout(p, showlegend = FALSE, yaxis = list(anchor = 'x', domain = c(0, 0.45)),
+            yaxis2 = list(anchor = 'x', domain = c(0.55, 1), title = 'unemploy'))
+p
+```
+
