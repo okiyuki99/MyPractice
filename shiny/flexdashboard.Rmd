@@ -1,11 +1,20 @@
 ---
 title: "Old Faithful Eruptions"
-output: flexdashboard::flex_dashboard
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
 runtime: shiny
 ---
 
-Column {.sidebar}
------------------------------------------------------------------------
+```{r}
+library(flexdashboard)
+library(shiny)
+library(shinydashboard)
+library(dplyr)
+```
+
+Sidebar {.sidebar}
+=======================================================================
 
 Waiting time between eruptions and the duration of the eruption for the
 Old Faithful geyser in Yellowstone National Park, Wyoming, USA.
@@ -18,7 +27,10 @@ sliderInput("bw_adjust", label = "Bandwidth adjustment:",
             min = 0.2, max = 2, value = 1, step = 0.2)
 ```
 
-Column
+Dashboard
+=======================================================================
+
+Row
 -----------------------------------------------------------------------
 
 ### Geyser Eruption Duration
@@ -31,4 +43,20 @@ renderPlot({
   dens <- density(faithful$eruptions, adjust = input$bw_adjust)
   lines(dens, col = "blue")
 })
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Articles per Day {.value-box}
+
+```{r}
+renderValueBox({
+  valueBox(
+    value = 11,
+    icon = "fa-area-chart",
+    color = "warning"
+  )
+})
+```
 ```
