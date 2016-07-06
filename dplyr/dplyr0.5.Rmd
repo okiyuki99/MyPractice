@@ -1,0 +1,102 @@
+---
+title: "dplyr 0.5の機能"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 参考
+- [dplyr 0.5.0を使ってみる](http://notchained.hatenablog.com/entry/2016/04/09/123059)
+- [dplyr](https://cran.r-project.org/web/packages/dplyr/dplyr.pdf)
+
+## dplyr 読み込み
+
+```{r}
+library(dplyr)
+```
+
+## arrange()はグループを無視するようになった
+
+```{r}
+df <- data.frame(x = c("a", "a", "b", "b"), 
+                 y = 1:4)
+df %>%
+  group_by(x) %>%
+  arrange(x, y)
+```
+
+## coalesce() NAを0で埋める
+
+```{r}
+x <- c(1, NA, NA, NA, 2, NA, 4, NA, NA)
+coalesce(x, 0)
+```
+
+##  case_when() はどうやら使いにくいようで、if_else() を使うみたい
+
+```{r}
+x <- c(-5:5, NA)
+print(x)
+dplyr::if_else(x < 0, NA_integer_, x)
+if_else(x < 0, "negative", "positive", "missing")
+```
+
+## Unlike ifelse, if_else preserves types
+
+```{r}
+x <- factor(sample(letters[1:5], 10, replace = TRUE))
+print(x)
+ifelse(x %in% c("a", "b", "c"), x, factor(NA))
+if_else(x %in% c("a", "b", "c"), x, factor(NA))
+```
+
+## na_if() : ある値をNAにする
+
+```{r}
+sweets <- c("geppei", "manju", "N/A", "sakuramochi", "N/A")
+print(sweets)
+na_if(sweets, "N/A")
+```
+
+## recode() : ベクトルで渡して、値を別の値に変える
+
+```{r}
+x <- c("a", "b", "a", "b", "a", "c")
+print(x)
+recode(x, a = "ほげ", b = "げほ", .default = "ほげほげ")
+```
+
+## union_all() : 2つのvector / df に対してくっつける（bind_rows / combine()）
+- union_all() method. Maps to UNION ALL for SQL sources, bind_rows() for data frames/tbl_dfs, and combine() for vectors (#1045).
+
+```{r}
+(first <- mtcars[1:20, ])
+(second <- mtcars[10:32, ])
+intersect(first, second)
+union(first, second)
+setdiff(first, second)
+setdiff(second, first)
+union_all(first, second)
+```
+
+## at シリーズ（each シリーズは古いらしい）
+
+```{r}
+iris %>%
+  group_by(Species) %>%
+  summarise_each(funs(mean), starts_with("S"))
+
+iris %>%
+  group_by(Species) %>%
+  summarise_at(vars(starts_with("S")), funs(mean))
+```
+
+## select_if() 条件を満たす列だけを選ぶ
+
+```{r}
+iris %>% select_if(is.factor)
+iris %>% select_if(is.numeric)
+iris %>% select_if(function(col) is.numeric(col) && mean(col) > 3.5)
+```
