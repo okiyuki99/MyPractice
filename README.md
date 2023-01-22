@@ -1,4 +1,4 @@
 # MyPractice
 いろいろお試し用
 
-test
+test=true
